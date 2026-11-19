@@ -1,14 +1,59 @@
-# astrbot-plugin-helloworld
+# 洛克王国世界「我是谁」
 
-AstrBot 插件模板 / A template plugin for AstrBot plugin feature
+小呱呱在 QQ 里发出「我是谁」题卡后，AstrBot 会根据剪影猜是哪只精灵。你可以对照它发来的名字和立绘，再向小呱呱提交答案。剪影在本地识别，无需配置看图模型。
 
-> [!NOTE]
-> This repo is just a template of [AstrBot](https://github.com/AstrBotDevs/AstrBot) Plugin.
-> 
-> [AstrBot](https://github.com/AstrBotDevs/AstrBot) is an agentic assistant for both personal and group conversations. It can be deployed across dozens of mainstream instant messaging platforms, including QQ, Telegram, Feishu, DingTalk, Slack, LINE, Discord, Matrix, etc. In addition, it provides a reliable and extensible conversational AI infrastructure for individuals, developers, and teams. Whether you need a personal AI companion, an intelligent customer support agent, an automation assistant, or an enterprise knowledge base, AstrBot enables you to quickly build AI applications directly within your existing messaging workflows.
+## 安装与开始使用
 
-# Supports
+1. 使用 **AstrBot 4.x（最低 4.12.4）** 和 Python 3.12+，确认 OneBot v11 或 QQ 官方适配器能在目标群或私聊中收到小呱呱的题卡。QQ 官方适配器从 4.26.0 起支持接收未 @ 机器人的普通群消息，需要在 QQ 开通群全量消息权限。
+2. 在 AstrBot WebUI 打开 **插件 → 安装插件 → 从链接安装**，粘贴本插件的[仓库地址](https://github.com/SihenZhang/astrbot_plugin_roco_jinie_silhouette_recognition)。已有插件 ZIP 时也可以选 **从文件安装**。安装后确认 **洛克王国世界「我是谁」** 已启用。
+3. 首次启用时，插件会从 [洛克王国世界Wiki](https://wiki.biligame.com/nrc/%E7%B2%BE%E7%81%B5%E5%9B%BE%E9%89%B4) 下载精灵立绘。在 AstrBot 日志中看到「Wiki 同步完成」后，就可以开始猜题了。首次下载的立绘实测约 292 MiB，大小会随图鉴更新而变化。
+4. 如果你的 QQ 平台实例 ID 是 `qq`，可以直接和小呱呱玩一轮「我是谁」。使用其他实例 ID 时，先在插件配置中把 **出题机器人 SID** 开头的 `qq` 换成实际 ID，保存并重载。小呱呱发出题卡后，AstrBot 会自动回复，无需另发指令或 @ AstrBot。
 
-- [AstrBot Repo](https://github.com/AstrBotDevs/AstrBot)
-- [AstrBot Plugin Development Docs (Chinese)](https://docs.astrbot.app/dev/star/plugin-new.html)
-- [AstrBot Plugin Development Docs (English)](https://docs.astrbot.app/en/dev/star/plugin-new.html)
+## 猜题时会看到什么？
+
+认出精灵时，AstrBot 会把猜测和对应的立绘放在同一条消息里。比如遇到波波拉，你可能会收到这样一句话。
+
+> 我投波波拉一票
+
+你可以对照立绘，按小呱呱题卡上的提示回复「是波波拉」。
+
+如果有两只精灵都很像，AstrBot 可能会说「我偏向波波拉，不过水灵也挺像」，并把两只精灵的立绘按名字顺序从左到右拼在一起。如果认不出来，它只会发一句文字，例如「这只精灵我暂时没认出来」。
+
+## 按需配置
+
+在 AstrBot WebUI 的 **插件** 页面打开 **洛克王国世界「我是谁」** 的配置，修改后保存并重载插件。
+
+| 配置名称 | 默认值 | 什么时候调整 |
+| --- | --- | --- |
+| 发送精灵立绘 | `true` | 只想看精灵名字时关闭。 |
+| 在同一条消息中发送文字和立绘 | `true` | 想先看文字、再单独收图时关闭。开启「发送精灵立绘」后可见。 |
+| 允许识别的会话 SID | `[]` | 默认所有能收到出题机器人消息的 QQ 会话都可以猜题。只想在某些群或私聊使用时，每项填一个会话的 SID。 |
+| 出题机器人 SID | `["qq:FriendMessage:2854203313"]` | 默认监听小呱呱。QQ 平台实例 ID 不同，或要识别其他账号发出的同类题卡时调整。清空后重载会恢复默认值。 |
+| Wiki 增量更新时间 | `"0 5 * * *"` | 默认按 AstrBot 配置的时区，每天 05:00 检查新立绘。留空可关闭定时检查，重载插件时仍会检查。 |
+| 访问 Wiki 的 User-Agent | `"AstrBot-RocoSilhouette/0.1.0 (daily Wiki sprite index)"` | 想自定义插件访问 Wiki 时使用的请求标识，可以在这里填写。 |
+
+### 只想在一个群里猜题，怎么填？
+
+在目标群发送 `/sid`，查看回复中的 **UMO**。假设你的 QQ 平台实例 ID 是 `qq2`，群号是 `123456`，小呱呱的账号是 `2854203313`，可以这样填。
+
+- **允许识别的会话 SID** 填 `qq2:GroupMessage:123456`。开启群成员隔离时也可以这样指定整个群。
+- **出题机器人 SID** 填 `qq2:FriendMessage:2854203313`。即使小呱呱在群里发题，这里也用 `FriendMessage`。使用 QQ 官方适配器时，以平台实际收到的出题账号 UID 为准。你自己发送 `/sid` 时，回复里的 **UID** 是你自己的账号。
+
+## 常见问题
+
+### 小呱呱发题了，为什么 AstrBot 没有回复？
+
+先看 AstrBot 收到的原消息。同一条消息里要有「我是谁」、作答提示「请回复 是 + 答案 或 这是 + 答案 的形式作答」和题图。题图可以是消息中的图片，也可以嵌在小呱呱的 Markdown 题卡里。插件只处理指定出题账号发来的题卡，自己把截图发给 AstrBot 会被跳过。
+
+如果原题卡已经收到了，检查 **出题机器人 SID** 中的平台实例 ID 和发送者账号。如果填了 **允许识别的会话 SID**，也要把当前群或私聊加进去。
+
+### 为什么 AstrBot 回复很慢？
+
+默认情况下，AstrBot 会把答案和精灵立绘放在同一条消息里。立绘上传较慢时，文字答案也会晚一些出现。
+
+- 想先看答案、再看图，可以关闭 **在同一条消息中发送文字和立绘**。AstrBot 会先发文字，再单独发图。
+- 只想看答案，可以直接关闭 **发送精灵立绘**，省去上传图片的时间。
+
+### 提示「精灵素材库正在初始化」或「精灵素材库暂时不可用」怎么办？
+
+正在初始化时，等首次下载完成，再试下一题。如果一直提示不可用，在 AstrBot 日志中搜索「Wiki 同步」。看到「Wiki 同步未完成」或「Wiki 同步失败」时，查看对应的错误记录，确认 AstrBot 所在设备能访问 Wiki 和立绘地址后，重载插件即可重新检查。已有可用图库时，后台更新期间仍可以猜题。

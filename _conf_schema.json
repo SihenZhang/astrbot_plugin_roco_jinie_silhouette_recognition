@@ -1,0 +1,38 @@
+{
+  "bot_sids": {
+    "description": "出题机器人 SID",
+    "type": "list",
+    "default": ["qq:FriendMessage:2854203313"],
+    "hint": "默认监听 QQ 机器人「小呱呱」。填写发送者 SID，每项一个。"
+  },
+  "allowed_sids": {
+    "description": "允许识别的会话 SID",
+    "type": "list",
+    "default": [],
+    "hint": "填写允许识别的会话 SID，每项一个。留空允许所有 QQ 会话。"
+  },
+  "send_image": {
+    "description": "发送精灵立绘",
+    "type": "bool",
+    "default": true,
+    "hint": "识别成功时附上立绘。关闭后只发文字。"
+  },
+  "image_in_same_message": {
+    "description": "在同一条消息中发送文字和立绘",
+    "type": "bool",
+    "default": true,
+    "condition": {"send_image": true},
+    "hint": "关闭后先发文字，再单独发图。"
+  },
+  "sync_cron": {
+    "description": "Wiki 增量更新时间",
+    "type": "string",
+    "default": "0 5 * * *",
+    "hint": "默认每天早上 5 点检查更新。"
+  },
+  "user_agent": {
+    "description": "访问 Wiki 的 User-Agent",
+    "type": "string",
+    "default": "AstrBot-RocoSilhouette/0.1.0 (daily Wiki sprite index)"
+  }
+}
